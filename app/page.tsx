@@ -1,69 +1,76 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState, useCallback } from "react";
+import { Header } from "./components/Header";
+import { Hero } from "./components/Hero";
+import { FeaturedWork } from "./components/FeaturedWork";
+import { EngineeringServices } from "./components/EngineeringServices";
+import { Footer } from "./components/Footer";
+import { BuildModal } from "./components/BuildModal";
+import { ProjectModal } from "./components/ProjectModal";
+import { FeaturedProject } from "./components/types";
+
+const FEATURED_PROJECTS: FeaturedProject[] = [
+  {
+    id: "carbon-aero",
+    category: "PROJECT APEX",
+    title: "Carbon Aero Kit",
+    image: "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1600&q=75",
+    description: "Ultra-lightweight pre-preg autoclaved carbon fiber rear wing, front splitter, and rear diffuser optimized in CFD wind-tunnels.",
+    specs: ["Weight: -18.5 kg", "Downforce: +240kg @ 250km/h", "Finish: 2x2 Twill Gloss Carbon"]
+  },
+  {
+    id: "wheels",
+    category: "WHEELS",
+    title: "Forged Series R",
+    image: "https://images.unsplash.com/photo-1611821064430-0d40291d0f0d?auto=format&fit=crop&w=1000&q=75",
+    description: "Monoblock 6061-T6 aerospace aluminum forged wheels engineered for extreme track loads and brake clearance.",
+    specs: ["Size: 20x9.5F / 21x12.5R", "Weight: 8.9 kg per wheel", "Brake Clearance: 420mm Carbon Ceramic"]
+  },
+  {
+    id: "interior",
+    category: "INTERIOR",
+    title: "Telemetry Wheel",
+    image: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1000&q=75",
+    description: "Full carbon fiber motorsport steering wheel with integrated OLED digital shift-light telemetry and Alcantara handgrips.",
+    specs: ["Display: 4.3\" Full Color OLED", "Grips: Italian Motorsport Alcantara", "Buttons: Rotary Encoders & APEM Switches"]
+  }
+];
+
+export default function ModCarbonLandingPage() {
+  const [isBuildModalOpen, setIsBuildModalOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<FeaturedProject | null>(null);
+
+  const handleOpenBuildModal = useCallback(() => {
+    setIsBuildModalOpen(true);
+  }, []);
+
+  const handleCloseBuildModal = useCallback(() => {
+    setIsBuildModalOpen(false);
+  }, []);
+
+  const handleSelectProject = useCallback((project: FeaturedProject) => {
+    setSelectedProject(project);
+  }, []);
+
+  const handleCloseProjectModal = useCallback(() => {
+    setSelectedProject(null);
+  }, []);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="min-h-screen bg-[#070b12] text-slate-100 font-sans selection:bg-[#00e5ff] selection:text-slate-950">
+      <Hero />
+      <FeaturedWork projects={FEATURED_PROJECTS} onSelectProject={handleSelectProject} />
+      <EngineeringServices />
+      <Footer />
+
+      {/* Modals rendered on demand */}
+      <BuildModal isOpen={isBuildModalOpen} onClose={handleCloseBuildModal} />
+      <ProjectModal
+        project={selectedProject}
+        onClose={handleCloseProjectModal}
+        onInquire={handleOpenBuildModal}
+      />
     </div>
   );
 }
