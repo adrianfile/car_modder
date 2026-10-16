@@ -12,7 +12,7 @@ export const FeaturedWork = memo(function FeaturedWork({ projects, onSelectProje
   if (projects.length < 3) return null;
 
   return (
-    <section id="featured" className="max-w-7xl mx-auto px-6 py-24">
+    <section id="projects" className="max-w-7xl mx-auto px-6 py-24">
       {/* Section Heading */}
       <div className="flex items-center gap-3 mb-10">
         <div className="w-1 h-7 bg-[#00e5ff] shadow-[0_0_10px_#00e5ff]" />

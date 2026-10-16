@@ -9,21 +9,33 @@ interface OrderModalProps {
   onClose: () => void;
   config: CarConfigState;
   totalPrice: number;
+  user?: { name: string | null; email: string } | null;
 }
 
 export const OrderModal: React.FC<OrderModalProps> = ({
   isOpen,
   onClose,
   config,
-  totalPrice
+  totalPrice,
+  user
 }) => {
   const [submitted, setSubmitted] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
+    name: user?.name || "",
+    email: user?.email || "",
     phone: "",
     notes: ""
   });
+
+  React.useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        name: prev.name || user.name || "",
+        email: prev.email || user.email || ""
+      }));
+    }
+  }, [user]);
 
   if (!isOpen) return null;
 

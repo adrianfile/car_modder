@@ -9,8 +9,7 @@ import {
   CALIPER_OPTIONS,
   PaintFinish,
   CameraPreset,
-  StudioEnvironment,
-  CustomModelData
+  StudioEnvironment
 } from "../types";
 import { ColorWheelPicker } from "./ColorWheelPicker";
 import {
@@ -26,24 +25,34 @@ import {
   ArrowLeft,
   Zap,
   Sparkles,
-  UploadCloud,
   RotateCcw,
   Wrench,
   Disc,
   Sliders,
   Eye,
   SlidersHorizontal,
-  ChevronDown
+  ChevronDown,
+  BookmarkCheck,
+  Wallet,
+  Crown
 } from "lucide-react";
 
 interface ConfiguratorUIProps {
   config: CarConfigState;
   onChange: (updater: (prev: CarConfigState) => CarConfigState) => void;
   onOpenOrderModal: () => void;
-  onOpenImportModal: () => void;
-  customModel?: CustomModelData | null;
-  onResetDefaultModel: () => void;
+  onOpenSaveModal: () => void;
+  user?: {
+    name: string | null;
+    email: string;
+    role?: string;
+    balance?: number;
+    isSubscribed?: boolean;
+    subscriptionTier?: "FREE" | "PRO" | "ENTERPRISE";
+  } | null;
   totalPrice: number;
+  onOpenTopUp?: () => void;
+  onOpenSubscription?: () => void;
 }
 
 type LeftPartTab = "wheels" | "brakes" | "aero" | "views";
@@ -53,10 +62,11 @@ export const ConfiguratorUI: React.FC<ConfiguratorUIProps> = ({
   config,
   onChange,
   onOpenOrderModal,
-  onOpenImportModal,
-  customModel,
-  onResetDefaultModel,
-  totalPrice
+  onOpenSaveModal,
+  user,
+  totalPrice,
+  onOpenTopUp,
+  onOpenSubscription
 }) => {
   // Navigation State for Left & Right Panels
   const [leftTab, setLeftTab] = useState<LeftPartTab>("wheels");
@@ -116,30 +126,71 @@ export const ConfiguratorUI: React.FC<ConfiguratorUIProps> = ({
               <span className="text-[10px] font-mono bg-cyan-950/80 text-[#00e5ff] border border-cyan-800/60 px-1.5 py-0.5 rounded-sm uppercase">
                 CONFIGURATOR 3D
               </span>
-              {customModel && (
-                <div className="hidden sm:flex items-center gap-1.5 bg-amber-950/60 border border-amber-500/50 text-amber-300 text-[10px] font-mono px-2 py-0.5 rounded-sm">
-                  <span>CUSTOM: {customModel.name}</span>
-                  <button
-                    type="button"
-                    onClick={onResetDefaultModel}
-                    title="Reset to Default Apex Supercar"
-                    className="hover:text-white cursor-pointer ml-1 text-amber-400 hover:text-amber-200"
-                  >
-                    <RotateCcw className="w-3 h-3" />
-                  </button>
-                </div>
-              )}
             </div>
             <h1 className="text-xs font-mono text-slate-400 hidden sm:block">
-              {customModel
-                ? `CUSTOM IMPORTED ASSET • ${customModel.name.toUpperCase()}`
-                : "APEX GT-R • BESPOKE MOTORSPORT SPEC"}
+              APEX GT-R • BESPOKE MOTORSPORT SPEC
             </h1>
           </div>
         </div>
 
-        {/* Pricing, Import & CTA */}
-        <div className="flex items-center gap-3">
+        {/* Pricing, Save Build, User Garage & Order CTA */}
+        <div className="flex items-center gap-2.5">
+          {user && (
+            <Link
+              href="/profile?tab=garage"
+              title="Buka Garage Profil Anda"
+              className="hidden xl:flex items-center gap-2 px-3 py-1.5 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/80 hover:border-cyan-500/50 rounded text-xs font-mono text-slate-300 hover:text-white transition-all shadow-sm group"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-400 group-hover:shadow-[0_0_8px_#34d399]" />
+              <span className="text-[10px] uppercase tracking-wider text-slate-400">PILOT:</span>
+              <span className="font-bold text-cyan-300">{user.name || user.email?.split("@")?.[0] || "Pilot"}</span>
+            </Link>
+          )}
+
+          {/* User Balance Button (Click to Top Up) */}
+          {user && (
+            <button
+              type="button"
+              onClick={onOpenTopUp}
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-emerald-950/60 hover:bg-emerald-900/80 border border-emerald-500/40 hover:border-emerald-400 text-emerald-300 hover:text-white rounded text-xs font-mono transition-all shadow-sm cursor-pointer group"
+              title="Klik untuk Top Up Saldo Akun"
+            >
+              <Wallet className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
+              <span className="font-bold">
+                ${(user.balance ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+              <span className="hidden sm:inline-block text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 group-hover:bg-emerald-500 group-hover:text-slate-950 font-black transition-colors">
+                + TOP UP
+              </span>
+            </button>
+          )}
+
+          {/* User Subscription Badge (Click to Upgrade) */}
+          {user && (
+            <button
+              type="button"
+              onClick={onOpenSubscription}
+              className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded text-[11px] font-mono font-bold tracking-wider uppercase border shadow-sm transition-all cursor-pointer ${
+                user.subscriptionTier === "ENTERPRISE"
+                  ? "bg-amber-950/60 hover:bg-amber-900/80 text-amber-300 hover:text-white border-amber-500/40 shadow-[0_0_10px_rgba(245,158,11,0.2)]"
+                  : user.subscriptionTier === "PRO"
+                  ? "bg-cyan-950/60 hover:bg-cyan-900/80 text-cyan-300 hover:text-white border-cyan-500/40 shadow-[0_0_10px_rgba(0,229,255,0.2)]"
+                  : "bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-700 hover:border-slate-500"
+              }`}
+              title="Klik untuk Kelola / Upgrade Paket Studio"
+            >
+              {user.subscriptionTier === "ENTERPRISE" ? (
+                <Crown className="w-3.5 h-3.5 text-amber-400" />
+              ) : (
+                <Zap className="w-3.5 h-3.5 text-cyan-400" />
+              )}
+              <span>{user.subscriptionTier || "FREE"}</span>
+              <span className="text-[8px] text-cyan-400 opacity-70 group-hover:opacity-100">
+                ▲
+              </span>
+            </button>
+          )}
+
           <div className="text-right hidden md:block">
             <span className="text-[10px] font-mono text-slate-400 block uppercase">
               ESTIMATED BUILD PRICE
@@ -149,14 +200,14 @@ export const ConfiguratorUI: React.FC<ConfiguratorUIProps> = ({
             </span>
           </div>
 
-          {/* Import 3D Model CTA */}
+          {/* Save Build Spec CTA */}
           <button
             type="button"
-            onClick={onOpenImportModal}
-            className="bg-slate-900/90 hover:bg-slate-800 text-cyan-300 hover:text-white border border-cyan-500/50 hover:border-[#00e5ff] font-mono text-xs px-3.5 py-2.5 rounded-sm uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+            onClick={onOpenSaveModal}
+            className="bg-slate-900/90 hover:bg-slate-800 text-cyan-300 hover:text-white border border-cyan-500/50 hover:border-[#00e5ff] font-mono text-xs px-3.5 py-2.5 rounded-sm uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 shadow-sm hover:shadow-[0_0_15px_rgba(0,229,255,0.25)]"
           >
-            <UploadCloud className="w-4 h-4 text-[#00e5ff]" />
-            <span className="hidden sm:inline">IMPORT 3D</span>
+            <BookmarkCheck className="w-4 h-4 text-[#00e5ff]" />
+            <span className="hidden sm:inline">SIMPAN BUILD</span>
           </button>
 
           <button

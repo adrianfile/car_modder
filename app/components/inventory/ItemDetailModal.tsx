@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import {
   X,
   ShieldCheck,
@@ -9,9 +10,24 @@ import {
   Wrench,
   PhoneCall,
   Sparkles,
+  Loader2,
 } from "lucide-react";
 import { InventoryItem } from "../../inventory/data";
-import { Item3DViewer } from "./Item3DViewer";
+
+const Item3DViewer = dynamic(
+  () => import("./Item3DViewer").then((mod) => mod.Item3DViewer),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full aspect-[4/3] rounded-lg bg-slate-900/50 border border-slate-800 flex flex-col items-center justify-center gap-2">
+        <Loader2 className="w-6 h-6 text-[#00e5ff] animate-spin" />
+        <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400">
+          Memuat Mesin 3D...
+        </span>
+      </div>
+    ),
+  }
+);
 
 interface ItemDetailModalProps {
   item: InventoryItem | null;

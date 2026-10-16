@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Header } from "./components/Header";
 import { Hero } from "./components/Hero";
 import { FeaturedWork } from "./components/FeaturedWork";
 import { EngineeringServices } from "./components/EngineeringServices";

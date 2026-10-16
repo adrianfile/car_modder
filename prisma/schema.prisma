@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  SUPERUSER
+}
+
+enum SubscriptionTier {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+model User {
+  id               String           @id @default(cuid())
+  email            String           @unique
+  name             String?
+  image            String?
+  password         String
+  role             Role             @default(USER)
+  balance          Float            @default(0.0)
+  isSubscribed     Boolean          @default(false)
+  subscriptionTier SubscriptionTier @default(FREE)
+  savedBuilds      SavedBuild[]
+  notifications    Notification[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model SavedBuild {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String   @default("Apex GT-R Custom Spec")
+  colorName     String
+  colorHex      String
+  finish        String   @default("gloss")
+  wheelName     String
+  wheelId       String
+  caliperName   String
+  caliperHex    String
+  carbonPackage Boolean  @default(true)
+  carbonSpoiler Boolean  @default(true)
+  totalPrice    Float
+  studioEnv     String   @default("dark-showroom")
+  status        String   @default("saved") // "saved" | "public"
+  isPublic      Boolean  @default(false)
+  thumbnailUrl  String?
+  description   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   @default("info") // "info" | "success" | "warning" | "system"
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}

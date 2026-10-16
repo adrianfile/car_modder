@@ -1025,6 +1025,16 @@ export const CarViewer3D: React.FC<CarViewer3DProps> = ({
       renderer.render(scene, camera);
     };
 
+    let isVisible = true;
+    const handleVisibilityChange = () => {
+      isVisible = document.visibilityState === "visible";
+      if (isVisible) {
+        lastTime = performance.now();
+        animationId = requestAnimationFrame(animate);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     animate();
 
     const handleResize = () => {
@@ -1041,11 +1051,35 @@ export const CarViewer3D: React.FC<CarViewer3DProps> = ({
     return () => {
       cancelAnimationFrame(animationId);
       window.removeEventListener("resize", handleResize);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      controls.dispose();
       dracoLoader.dispose();
+
+      if (sceneRef.current) {
+        sceneRef.current.traverse((object) => {
+          const mesh = object as THREE.Mesh;
+          if (mesh.isMesh) {
+            mesh.geometry?.dispose();
+            if (mesh.material) {
+              const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+              materials.forEach((mat) => {
+                Object.values(mat).forEach((val) => {
+                  if (val && typeof val === "object" && "isTexture" in val && (val as THREE.Texture).isTexture) {
+                    (val as THREE.Texture).dispose();
+                  }
+                });
+                mat.dispose();
+              });
+            }
+          }
+        });
+      }
+
       renderer.dispose();
       container.replaceChildren();
       carGroupRef.current = null;
       sceneRef.current = null;
+      controlsRef.current = null;
     };
   }, []);
 

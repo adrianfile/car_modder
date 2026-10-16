@@ -632,7 +632,9 @@ export const Item3DViewer: React.FC<Item3DViewerProps> = ({ category, itemName, 
 
     // Animation Loop
     let animationFrameId: number;
+    let isVisible = true;
     const animate = () => {
+      if (!isVisible) return;
       animationFrameId = requestAnimationFrame(animate);
 
       if (autoRotateRef.current && !isDragging) {
@@ -641,6 +643,15 @@ export const Item3DViewer: React.FC<Item3DViewerProps> = ({ category, itemName, 
 
       renderer.render(scene, camera);
     };
+
+    const handleVisibilityChange = () => {
+      isVisible = document.visibilityState === "visible";
+      if (isVisible) {
+        animationFrameId = requestAnimationFrame(animate);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     animate();
 
     // Resize Handler
@@ -657,6 +668,7 @@ export const Item3DViewer: React.FC<Item3DViewerProps> = ({ category, itemName, 
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", handleResize);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       domElement.removeEventListener("mousedown", handlePointerDown);
       domElement.removeEventListener("mousemove", handlePointerMove);
       window.removeEventListener("mouseup", handlePointerUp);
@@ -664,6 +676,27 @@ export const Item3DViewer: React.FC<Item3DViewerProps> = ({ category, itemName, 
       domElement.removeEventListener("touchmove", handlePointerMove);
       window.removeEventListener("touchend", handlePointerUp);
       domElement.removeEventListener("wheel", handleWheel);
+
+      scene.traverse((object) => {
+        const mesh = object as THREE.Mesh;
+        if (mesh.isMesh) {
+          mesh.geometry?.dispose();
+          if (mesh.material) {
+            const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+            materials.forEach((mat) => {
+              Object.values(mat).forEach((val) => {
+                if (val && typeof val === "object" && "isTexture" in val && (val as THREE.Texture).isTexture) {
+                  (val as THREE.Texture).dispose();
+                }
+              });
+              mat.dispose();
+            });
+          }
+        }
+      });
+
+      whiteCeramicTex?.dispose();
+      wallTex?.dispose();
 
       renderer.dispose();
       scene.clear();

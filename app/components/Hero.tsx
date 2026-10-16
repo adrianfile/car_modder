@@ -4,8 +4,8 @@ import { memo } from "react";
 import Link from "next/link";
 
 export const Hero = memo(function Hero() {
-  const scrollToFeatured = () => {
-    const el = document.getElementById("featured");
+  const scrollToProjects = () => {
+    const el = document.getElementById("projects") || document.getElementById("featured");
     el?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -46,7 +46,7 @@ export const Hero = memo(function Hero() {
             <span className="text-slate-950">→</span>
           </Link>
           <button
-            onClick={scrollToFeatured}
+            onClick={scrollToProjects}
             className="bg-slate-950/80 hover:bg-slate-900 border border-slate-700/80 text-white font-bold text-xs px-7 py-3.5 rounded-sm uppercase tracking-widest transition-all duration-200 cursor-pointer not-italic"
           >
             EXPLORE BUILDS
